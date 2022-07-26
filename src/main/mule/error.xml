@@ -192,15 +192,22 @@ output application/java
 		<ee:transform doc:name="Error Response" doc:id="1e9b9ba3-0d9f-42aa-b0e4-fe1e5a0351c1" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json encoding="UTF-8", skipNullOn="everywhere"
+output application/json encoding = "UTF-8", skipNullOn = "everywhere"
 var errors = (((error.description default "" replace "Error validating JSON. Error: - " with "") replace "- " with "") splitBy "\n")
 ---
 {
-	code : vars.httpStatus,
-	message : if(vars.errorMessage != null) vars.errorMessage else (error.errorType.identifier),
-	description: if(vars.errorDescription != null) vars.errorDescription else error.description,
-	dateTime : now() as String { format: "yyyy-MM-dd'T'HH:mm:ss'Z'" },
-	transactionId : vars.transactionId
+	success: false,
+	api_name: "attributes.requestUri",
+	version: "1.0.0",
+	correlation_id: correlationId,
+	time_stamp: now() as String {
+		format: "yyyy-MM-dd'T'HH:mm:ss'Z'"
+	},
+	error_details: [{
+		code: vars.httpStatus,
+		reason: if ( vars.errorMessage != null ) vars.errorMessage else (error.errorType.identifier),
+		message: if ( vars.errorDescription != null ) vars.errorDescription else error.description,
+	}]
 }
 ]]></ee:set-payload>
 			</ee:message>
